@@ -11,6 +11,7 @@ function WorkLog(){
         duration: "",
         date: today()
     });
+    const [logs, setLogs] = useState([]);
 
     function handleChange(event){
         setFormData({
@@ -20,9 +21,12 @@ function WorkLog(){
     }
 
     function handleSubmit(event){
+        console.log("Submitting form...");
+        
         event.preventDefault();
         console.log(formData);
-        // Here you can add code to send the formData to a server or store it in local storage
+        setLogs([...logs, formData]);
+        setFormData({ workoutType: "", duration: "", date: today() });
     }
 
     return (
@@ -45,6 +49,12 @@ function WorkLog(){
                 <br />
                 <button type="submit">Log Workout</button>
             </form>
+            
+            {logs.map((log, index) => (
+                <div key={index}>
+                    <p>{log.workoutType} - { log.duration } mins - {log.date}</p>
+                </div>
+            ))}
         </>
     )
 }
