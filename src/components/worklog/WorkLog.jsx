@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./WorkLog.css";
+import { db } from "../../firebase";
+import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 function today() {
     return new Date().toISOString().split("T")[0];
@@ -14,6 +16,15 @@ function WorkLog() {
     });
     const [logs, setLogs] = useState([]);
 
+    useEffect(() => {
+        async function fetchLogs(){
+            const querySnapshot = await getDocs(collection(db, "workouts"));
+            const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setLogs(data);
+        }
+        fetchLogs();
+    }, []);
+
     function handleChange(event) {
         setFormData({
             ...formData,
@@ -21,17 +32,18 @@ function WorkLog() {
         });
     }
 
-    function handleSubmit(event) {
-        console.log("Submitting form...");
-
+    async function handleSubmit(event) {
         event.preventDefault();
         console.log(formData);
-        setLogs([...logs, formData]);
+        const docRef = await addDoc(collection(db, 'workouts'), formData);
+        // setLogs([...logs, formData]);
+        setLogs([...logs, { id: docRef.id, ...formData }]);
         setFormData({ workoutType: "", duration: "", date: today() });
     }
 
-    function handleDelete(index) {
-        setLogs(logs.filter((_, i) => i !== index));
+    async function handleDelete(id) {
+        await deleteDoc(doc(db, "workouts", id));
+        setLogs(logs.filter((log) => log.id !== id));
     }
 
     return (
@@ -60,7 +72,7 @@ function WorkLog() {
                             <p>💪 {log.workoutType}</p>
                             <span>{log.duration} mins • {log.date}</span>
                         </div>
-                        <button className="delete-btn" onClick={() => handleDelete(index)}>✕ Remove</button>
+                        <button className="delete-btn" onClick={() => handleDelete(log.id)}>✕ Remove</button>
                     </div>
                 ))}
             </div>
