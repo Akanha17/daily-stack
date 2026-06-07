@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import "./StudyLog.css"
+import { db } from "../../firebase"
+import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 
 function today() {
@@ -15,19 +17,31 @@ function StudyLog() {
 
     const [logs, setLogs] = useState([])
 
+    useEffect(() => {
+        async function fetchLogs(){
+            const querySnapshot = await getDocs(collection(db, "studies"));
+            const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            setLogs(data);
+        }
+        fetchLogs();
+    }, [])
+
     function handleChange(event){
         setFormData({
             ...formData,
             [event.target.name]: event.target.value
         })
     }
-    function handleSubmit(event){
+    async function handleSubmit(event){
         event.preventDefault();
-        setLogs([...logs, formData]);
+        // setLogs([...logs, formData]);
+        const docRef = await addDoc(collection(db, 'studies'), formData);
+        setLogs([...logs, { id: docRef.id, ...formData }]);
         setFormData({ studyType: "", duration: "", notes: "", date: today() });
     }
-    function handleDelete(index){
-        setLogs(logs.filter((_, i) => i !== index));
+    async function handleDelete(id){
+        await deleteDoc(doc(db, "studies", id));
+        setLogs(logs.filter((obj) => obj.id !== id));
     }
     return (
         <div className="studylog-container container">
@@ -60,7 +74,7 @@ function StudyLog() {
                             <p>⏱️ {log.duration} minutes</p>
                             <p>📅 {log.date}</p>
                         </div>
-                        <button className="delete-btn" onClick={() => handleDelete(index)}>🗑️ Delete</button>
+                        <button className="delete-btn" onClick={() => handleDelete(log.id)}>🗑️ Delete</button>
                     </div>)
                 )}
             </div>
