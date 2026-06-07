@@ -2,6 +2,7 @@ import { useState } from 'react';
 import WorkLog from './components/Worklog/WorkLog.jsx';
 import StudyLog from './components/studylog/StudyLog.jsx';
 import './App.css';
+import Journal from './components/journal/Journal.js';
 
 function App(){
   const [activeTab, setActiveTab] = useState('workout');
@@ -16,6 +17,7 @@ function App(){
       </div>
       {activeTab === 'workout' && <WorkLog />}
       {activeTab === 'study' && <StudyLog />}
+      {activeTab === 'journal' && <Journal />}
     </div>
   )
 }
