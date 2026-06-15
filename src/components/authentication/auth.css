@@ -1,0 +1,32 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 400px;
+    background-color: rgba( 150, green, blue, alpha);
+}
+.form{
+    margin: 0;
+    background-color: #fff0;
+}
+.form input{
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.form button{
+    padding: 10px;
+    font-size: 14px;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.link{
+    cursor: pointer;
+}
+.link:hover{
+    text-decoration: underline;
+}

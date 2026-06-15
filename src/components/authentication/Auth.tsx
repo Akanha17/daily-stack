@@ -39,11 +39,11 @@ function Auth({setUser}){
     }
 
     return (
-        <div>
+        <div className="container">
             <h1>Authentication</h1>
-            <form onSubmit={ submit }>
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <form onSubmit={ submit } className="form">
+                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} tabIndex={0} />
+                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} tabIndex={0} />
                 <button type="submit"> {mode === 'signup' ? 'Sign Up' : 'login'} </button>
             </form>
             {
