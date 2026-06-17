@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react';
 import './journal.css';
 import { db } from '../../firebase';
 import { collection, addDoc, doc, deleteDoc, getDocs } from 'firebase/firestore';
+import { query, where } from 'firebase/firestore';
+import { auth } from '../../firebase';
 
 
 function today(){
     return new Date().toISOString().split("T")[0]
 }
 function Journal() {
+    const userid = auth.currentUser ? auth.currentUser.uid : null;
+
     const moods = ['Good 😊', 'Okay 👌🏻', 'Bad 😔'];
     const [formData, setFormData] = useState({
         mood: 'Good 😊',
@@ -22,7 +26,7 @@ function Journal() {
 
     async function handleSubmit(event){
         event.preventDefault();
-        const docRef = await addDoc(collection(db, 'journalEntries'), formData);
+        const docRef = await addDoc(collection(db, 'journalEntries'), {...formData, userId: userid});
         setJournalEntries([...journalEntries, {id:docRef.id, ...formData}]);
         setFormData({
             mood: 'Good 😊',
@@ -32,13 +36,13 @@ function Journal() {
     }
     useEffect(() => {
         async function fetchEntries(){
-            const entriesCollection = collection(db, 'journalEntries');
+            const entriesCollection = query(collection(db, 'journalEntries'), where('userId', '==', userid));
             const entriesSnapshot = await getDocs(entriesCollection);
             const entriesList = entriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setJournalEntries(entriesList);
         }
         fetchEntries();
-    }, [])
+    }, [userid])
 
     async function handleDelete(id){
         await deleteDoc(doc(db, 'journalEntries', id));

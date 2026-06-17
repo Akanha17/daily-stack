@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import "./WorkLog.css";
 import { db } from "../../firebase";
-import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
+import { auth } from "../../firebase";
 
 function today() {
     return new Date().toISOString().split("T")[0];
 }
 
 function WorkLog() {
+    const userid = auth.currentUser ? auth.currentUser.uid : null;
 
     const [formData, setFormData] = useState({
         workoutType: "",
@@ -18,12 +20,12 @@ function WorkLog() {
 
     useEffect(() => {
         async function fetchLogs(){
-            const querySnapshot = await getDocs(collection(db, "workouts"));
+            const querySnapshot = await getDocs(query(collection(db, "workouts"), where("userId", "==", userid)));
             const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setLogs(data);
         }
         fetchLogs();
-    }, []);
+    }, [userid]);
 
     function handleChange(event) {
         setFormData({
@@ -33,9 +35,10 @@ function WorkLog() {
     }
 
     async function handleSubmit(event) {
+        console.log('user', userid);
         event.preventDefault();
         console.log(formData);
-        const docRef = await addDoc(collection(db, 'workouts'), formData);
+        const docRef = await addDoc(collection(db, 'workouts'), {...formData, userId: userid});
         // setLogs([...logs, formData]);
         setLogs([...logs, { id: docRef.id, ...formData }]);
         setFormData({ workoutType: "", duration: "", date: today() });

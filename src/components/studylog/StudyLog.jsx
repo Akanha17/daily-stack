@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react'
 import "./StudyLog.css"
 import { db } from "../../firebase"
 import { collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { query, where } from "firebase/firestore";
+import { auth } from "../../firebase";
 
 
 function today() {
     return new Date().toISOString().split("T")[0];
 }
 function StudyLog() {
+    const userid = auth.currentUser ? auth.currentUser.uid : null;
+
     const [formData, setFormData] = useState({
         studyType: "",
         duration: "",
@@ -19,12 +23,12 @@ function StudyLog() {
 
     useEffect(() => {
         async function fetchLogs(){
-            const querySnapshot = await getDocs(collection(db, "studies"));
+            const querySnapshot = await getDocs(query(collection(db, "studies"), where("userId", "==", userid)));
             const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
             setLogs(data);
         }
         fetchLogs();
-    }, [])
+    }, [userid])
 
     function handleChange(event){
         setFormData({
@@ -35,7 +39,7 @@ function StudyLog() {
     async function handleSubmit(event){
         event.preventDefault();
         // setLogs([...logs, formData]);
-        const docRef = await addDoc(collection(db, 'studies'), formData);
+        const docRef = await addDoc(collection(db, 'studies'), {...formData, userId: userid});
         setLogs([...logs, { id: docRef.id, ...formData }]);
         setFormData({ studyType: "", duration: "", notes: "", date: today() });
     }
